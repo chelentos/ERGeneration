@@ -99,7 +99,7 @@ query = OrderedDict([("collMod", "Requirements"),
 db.command(query)
 
 u1 = User(email="test1@gmail.com", 
-          password_hash=generate_password_hash("12345678", method="sha256"),
+          password_hash=generate_password_hash("12345678"),
           isAgreeToCollectData=True).save()
 
 p1 = Project(name="test_project1",

@@ -1,7 +1,5 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import ReqsInput from '@/components/ReqsInput.vue'
-import ClassifiedReqs from '@/components/ClassifiedReqs.vue'
 
 Vue.use(Router)
 
@@ -10,13 +8,27 @@ export default new Router({
     {
       path: '/',
       name: 'home',
-      component: ReqsInput,
-    },
-    {
-      path: '/reqs',
-      name: 'reqs',
-      component: ClassifiedReqs,
-      meta: { label: '' },
+      component: () => import('./components/Container/VContainer.vue'),
+      children: [
+        {
+          path: 'login',
+          name: 'login',
+          meta: { label: '' },
+          component: () => import('./components/Auth/VLoginForm.vue'),
+        },
+        {
+          path: 'register',
+          name: 'register',
+          meta: { label: '' },
+          component: () => import('./components/Auth/VRegisterForm.vue'),
+        },
+        {
+          path: 'projects',
+          name: 'projects',
+          meta: { label: '' },
+          component: () => import('./components/Projects/VProjectsList.vue'),
+        },
+      ],
     },
   ],
 })
