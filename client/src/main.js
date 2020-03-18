@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import { BootstrapVue } from 'bootstrap-vue'
 import VueCookies from 'vue-cookies'
+import VueMoment from 'vue-moment'
 import App from '@/App.vue'
 
 
@@ -14,7 +15,12 @@ Vue.use(VueCookies)
 
 Vue.config.productionTip = false
 
-// Vue.use(VueRouter)
+const moment = require('moment')
+require('moment/locale/ru')
+
+Vue.use(VueMoment, {
+  moment,
+})
 
 store.dispatch('currentUser/fetchCurrentUser').then(() => {
   new Vue({

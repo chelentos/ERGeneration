@@ -1,8 +1,8 @@
 <template>
     <div class="app">
         <v-navbar class="navbar-block">
-          <b-navbar-nav v-if="$router.app._route.fullPath === '/'">
-              <b-nav-item v-if="currentUser" class="px-2" href="/#/projects">Мои проекты</b-nav-item>
+          <b-navbar-nav>
+            <b-nav-item v-if="currentUser" class="px-2" href="/#/projects">Мои проекты</b-nav-item>
           </b-navbar-nav>
 
           <b-navbar-nav class="ml-auto">

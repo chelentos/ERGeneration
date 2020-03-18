@@ -19,7 +19,9 @@ mongo_client = MongoClient("mongodb://er-ad:t100km0201@localhost:27017/er-gen?au
 sess = Session()
 
 # instantiate the app
-app = Flask(__name__)
+app = Flask(__name__,
+            static_url_path='/public', 
+            static_folder='public',)
 app.config.from_object(Config)
 app.config['SESSION_TYPE'] = 'mongodb'
 app.config['SESSION_MONGODB'] = mongo_client

@@ -7,7 +7,7 @@
         ></i>
       </span>
       <a :href="`/#/projects/${project.id}`" class="card-link">Открыть</a>
-      <b-modal 
+      <b-modal
         :id="`deleteProjectModal-${project.id}`"
         title="Удаление проекта"
         :ok-title="'Ок'"

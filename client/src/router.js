@@ -28,6 +28,18 @@ export default new Router({
           meta: { label: '' },
           component: () => import('./components/Projects/VProjectsList.vue'),
         },
+        {
+          path: 'projects/:projectId',
+          name: 'project',
+          meta: { label: '' },
+          component: () => import('./components/Projects/VProject.vue'),
+        },
+        {
+          path: 'projects/:projectId/input',
+          name: 'reqsInput',
+          meta: { label: '' },
+          component: () => import('./components/Requirements/VReqsInput.vue'),
+        },
       ],
     },
   ],

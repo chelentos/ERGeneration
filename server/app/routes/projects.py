@@ -5,6 +5,9 @@ from app import app
 from app.models.Project import Project
 from app.models.Requirement import Requirement
 
+from nlp.classify import classifyReqs
+
+from app.tt_generation import generateTT
 
 @app.route("/api/projects", methods=["GET"])
 @login_required
@@ -23,9 +26,18 @@ def projects():
 def create_new_project():
   name = request.json['name']
   if name:
-    Project(name=name, parent=current_user.id).save()
+    Project(name=name, parent=current_user.id, erd=None).save()
     return jsonify({"text": "Project created."}), 200
   return jsonify({"text": "Project name needed."}), 500
+
+@app.route("/api/projects/<id>", methods=["GET"])
+@login_required
+def get_project(id):
+  if id:
+    project = Project.objects(pk=id).first()
+    requirements = Requirement.objects(parent=id)
+    return jsonify({"project": getResponseProject(project, requirements)}), 200
+  return jsonify({"text": "Project id needed."}), 500
 
 @app.route("/api/projects/<id>", methods=["DELETE"])
 @login_required
@@ -34,3 +46,68 @@ def delete_project(id):
     Project(pk=id).delete()
     return jsonify({"text": "Project deleted."}), 200
   return jsonify({"text": "Project id needed."}), 500
+
+@app.route("/api/projects/<id>/reqs", methods=["POST"])
+@login_required
+def load_reqs(id):
+  if id:
+    project = Project.objects(pk=id).first()
+    if project:
+      classifiedReqs = classifyReqs(request.json['reqs'])
+      for req in classifiedReqs:
+        Requirement(text=req['text'],
+                    req_type=req['type'],
+                    parent=id).save()
+      requirements = Requirement.objects(parent=id)
+      return jsonify({"reqs": getResponseReqs(requirements)}), 200
+  return jsonify({"text": "Project id needed."}), 500
+
+@app.route("/api/projects/<id>/reqs", methods=["PUT"])
+@login_required
+def update_req(id):
+  if id:
+    project = Project.objects(pk=id).first()
+    if project:
+      success = Requirement(pk=request.json['req']['id']).update(
+        text = request.json['req']['text'],
+        req_type = request.json['req']['type'],
+        parent = id
+      )
+      if success:
+        return jsonify({"text": "Req was updated"}), 200
+      else:
+        return jsonify({"text": "Req was not updated"}), 500
+  return jsonify({"text": "Project id needed."}), 500
+
+@app.route("/api/projects/<project_id>/reqs/<req_id>", methods=["DELETE"])
+@login_required
+def delete_req(project_id, req_id):
+  if req_id:
+    Requirement(pk=req_id).delete()
+    return jsonify({"text": "Requirement deleted."}), 200
+  return jsonify({"text": "Requirement id needed."}), 500
+
+@app.route("/api/projects/<project_id>/generate-tt", methods=["POST"])
+@login_required
+def generate_tt(project_id):
+  if project_id:
+    requirements = request.json['reqs']
+    ttLink = generateTT(requirements)
+    return jsonify({"text": "TT generated.", "ttLink": ttLink}), 200
+  return jsonify({"text": "Project id needed."}), 500
+
+def getResponseReqs(reqs):
+  return list(map(lambda x: {
+        "text": x.text,
+        "type": x.req_type,
+        "id": str(x.pk),
+        "createdAt": x.id.generation_time
+      }, reqs))
+
+def getResponseProject(project, reqs):
+  rProject = {}
+  rProject['id'] = str(project.id)
+  rProject['name'] = project.name
+  rProject['erd'] = project.erd
+  rProject['reqs'] = getResponseReqs(reqs)
+  return rProject
