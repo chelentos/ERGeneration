@@ -32,4 +32,8 @@ export default {
   generateTT(projectId, reqs) {
     return http.post(`/api/projects/${projectId}/generate-tt`, { reqs })
   },
+
+  generateER(projectId, text) {
+    return http.post(`/api/projects/${projectId}/generate-er`, { text })
+  },
 }

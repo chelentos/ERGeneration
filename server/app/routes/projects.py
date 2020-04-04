@@ -6,6 +6,7 @@ from app.models.Project import Project
 from app.models.Requirement import Requirement
 
 from nlp.classify import classifyReqs
+from nlp.er_generation import getErFromText, getErFromERSents
 
 from app.tt_generation import generateTT
 
@@ -89,11 +90,34 @@ def delete_req(project_id, req_id):
 
 @app.route("/api/projects/<project_id>/generate-tt", methods=["POST"])
 @login_required
-def generate_tt(project_id):
+def generate_TTs(project_id):
   if project_id:
     requirements = request.json['reqs']
     ttLink = generateTT(requirements)
     return jsonify({"text": "TT generated.", "ttLink": ttLink}), 200
+  return jsonify({"text": "Project id needed."}), 500
+
+@app.route("/api/projects/<project_id>/generate-ersents", methods=["POST"])
+@login_required
+def generate_ERSents(project_id):
+  if project_id:
+    text = request.json['text']
+    if text:
+      ERSents = getErFromText(text)
+      return jsonify({"text": "ERSents generated.", "er": ERSents}), 200
+    else:
+      return jsonify({"text": "No text."}), 500
+  return jsonify({"text": "Project id needed."}), 500
+
+@app.route("/api/projects/generate-er", methods=["POST"])
+@login_required
+def generate_ER():
+  sents = request.json['sents']
+  if sents:
+    er = getErFromERSents(sents)
+    return jsonify({"text": "ER generated.", "er": er}), 200
+  else:
+    return jsonify({"text": "No text."}), 500
   return jsonify({"text": "Project id needed."}), 500
 
 def getResponseReqs(reqs):

@@ -6,6 +6,7 @@ const MUTATION_TYPE = {
   setProjectReqs: 'setProjectReqs',
   setERGeneration: 'setERGeneration',
   setTTGeneration: 'setTTGeneration',
+  setERSents: 'setERSents',
 }
 
 const ACTION_TYPE = {
@@ -17,6 +18,7 @@ const ACTION_TYPE = {
   fetchProjects: 'fetchProjects',
   fetchProject: 'fetchProject',
   loadReqs: 'loadReqs',
+  genERSents: 'genERSents',
 }
 
 const GETTER_TYPE = {
@@ -26,6 +28,7 @@ const GETTER_TYPE = {
   getProject: 'getProject',
   isERGeneration: 'isERGeneration',
   isTTGeneration: 'isTTGeneration',
+  getERSents: 'getERSents',
 }
 
 export {

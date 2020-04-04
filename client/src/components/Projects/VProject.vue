@@ -83,6 +83,7 @@ export default {
     }),
     ...mapActions({
       fetchProject: 'projects/fetchProject',
+      genERSents: 'projects/genERSents',
     }),
     addReqs() {
       this.$router.push(`/projects/${this.$route.params.projectId}/input`)
@@ -110,6 +111,14 @@ export default {
             window.open(`http://127.0.0.1:5000/${response.data.ttLink}`, '_blank')
             this.setTTGeneration(false)
             this.selectedReqs = []
+          })
+      } else if (this.isERGeneration) {
+        this.genERSents({
+          projectId: this.$route.params.projectId,
+          text: this.selectedReqs.map((r) => r.text).join(' '),
+        })
+          .then(() => {
+            this.$router.push('./')
           })
       }
     },

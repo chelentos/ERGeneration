@@ -40,6 +40,12 @@ export default new Router({
           meta: { label: '' },
           component: () => import('./components/Requirements/VReqsInput.vue'),
         },
+        {
+          path: 'projects/:projectId/er_generation',
+          name: 'er_generation',
+          meta: { label: '' },
+          component: () => import('./components/ER/VERGeneration.vue'),
+        },
       ],
     },
   ],

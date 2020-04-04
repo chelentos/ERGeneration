@@ -4179,6 +4179,11 @@ globule@^1.0.0:
     lodash "~4.17.10"
     minimatch "~3.0.2"
 
+gojs@^2.1.10:
+  version "2.1.10"
+  resolved "https://registry.yarnpkg.com/gojs/-/gojs-2.1.10.tgz#2e6826ee0090742d26e86486a91b0966d2a6e408"
+  integrity sha512-ferVMuop467Zr8O7SQVC38aYjoKbTOtjd+vON5BK8roIjdUtbAfqhkj1Fjv4fF1CJhr1PyYbHWYM3rYXCQCP0A==
+
 graceful-fs@^4.1.11, graceful-fs@^4.1.15, graceful-fs@^4.1.2, graceful-fs@^4.1.6:
   version "4.2.3"
   resolved "https://registry.npm.taobao.org/graceful-fs/download/graceful-fs-4.2.3.tgz#4a12ff1b60376ef09862c2093edd908328be8423"
