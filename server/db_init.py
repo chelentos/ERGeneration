@@ -53,10 +53,6 @@ projects_validator = {
           "bsonType": "string",
           "description": "must be a string and is required"
         },
-        "erd": {
-          "bsonType": "object",
-          "description": "must be an object and is not required"
-        },
         "parent": {
           "bsonType": "objectId",
           "description": "must be an objectId and is required"
@@ -67,6 +63,34 @@ projects_validator = {
 
 query = OrderedDict([("collMod", "Projects"),
         ("validator", projects_validator),
+        ("validationLevel", "strict")])
+db.command(query)
+
+db.create_collection("Ers")
+
+ers_validator = {
+  "$jsonSchema": {
+      "bsonType": "object",
+      "required": [ "name", "parent"],
+      "properties": {
+        "name": {
+          "bsonType": "string",
+          "description": "must be a string and is required"
+        },
+        "erd": {
+          "bsonType": "object",
+          "description": "must be an objectId and is required"
+        },
+        "parent": {
+          "bsonType": "objectId",
+          "description": "must be an objectId and is required"
+        }
+      }
+    }
+  }
+
+query = OrderedDict([("collMod", "Ers"),
+        ("validator", ers_validator),
         ("validationLevel", "strict")])
 db.command(query)
 

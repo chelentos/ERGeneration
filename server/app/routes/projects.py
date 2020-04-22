@@ -3,6 +3,7 @@ from flask_login import login_required, current_user
 
 from app import app
 from app.models.Project import Project
+from app.models.ER import ER
 from app.models.Requirement import Requirement
 
 from nlp.classify import classifyReqs
@@ -16,7 +17,6 @@ def projects():
   projects = Project.objects(parent=current_user.id).only('name')
   response_projects = list(map(lambda x: {
       "name": x.name,
-      "erd": x.erd,
       "id": str(x.pk),
       "reqsNum": Requirement.objects(parent=x.id).count()
     }, projects))
@@ -27,7 +27,7 @@ def projects():
 def create_new_project():
   name = request.json['name']
   if name:
-    Project(name=name, parent=current_user.id, erd=None).save()
+    Project(name=name, parent=current_user.id).save()
     return jsonify({"text": "Project created."}), 200
   return jsonify({"text": "Project name needed."}), 500
 
@@ -118,6 +118,16 @@ def generate_ER():
     return jsonify({"text": "ER generated.", "er": er}), 200
   else:
     return jsonify({"text": "No text."}), 500
+
+@app.route("/api/projects/<project_id>/save-er", methods=["POST"])
+@login_required
+def save_ER(project_id):
+  er = request.json['er']
+  if er:
+    ER(name=er['name'], erd=er['erd'], parent=project_id).save()
+    return jsonify({"text": "ER generated."}), 200
+  else:
+    return jsonify({"text": "No er."}), 500
   return jsonify({"text": "Project id needed."}), 500
 
 def getResponseReqs(reqs):
@@ -132,6 +142,5 @@ def getResponseProject(project, reqs):
   rProject = {}
   rProject['id'] = str(project.id)
   rProject['name'] = project.name
-  rProject['erd'] = project.erd
   rProject['reqs'] = getResponseReqs(reqs)
   return rProject

@@ -37,8 +37,9 @@ def generateTT(reqs):
         )
   now = datetime.datetime.now()
   Path("app/public/" + str(current_user.id)).mkdir(parents=True, exist_ok=True)
-  document.save('app/public/' + str(current_user.id) + '/tt_' + now.strftime("%Y.%m.%d_%H.%M.%S") + '.docx')
-  return 'public/' + str(current_user.id) + '/tt_' + now.strftime("%Y.%m.%d_%H.%M.%S") + '.docx'
+  documentTime = now.strftime("%Y.%m.%d_%H.%M.%S")
+  document.save('app/public/' + str(current_user.id) + '/tt_' + documentTime + '.docx')
+  return 'public/' + str(current_user.id) + '/tt_' + documentTime + '.docx'
 
 
 
