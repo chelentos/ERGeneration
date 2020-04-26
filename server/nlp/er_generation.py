@@ -2,9 +2,13 @@ import sys
 import ufal.udpipe
 import re
 import os
+import datetime
+import xml.etree.cElementTree as ET
+from pathlib import Path
 
 import numpy as np
 
+from flask_login import current_user
 class Model:
     def __init__(self, path):
         """Load given model."""
@@ -403,3 +407,37 @@ def getErFromERSents(sents):
                                         'fromAtr': atr2['text'],
                                     })
   return ents
+
+def exportXML(ents):
+    # create XML 
+    root = ET.Element("root")
+
+    idx = 0
+    entsDict = {}
+    for entity, structure in ents.items():
+        entsDict[entity] = idx
+        entityElement = ET.SubElement(root, 'entity', id=str(idx))
+        ET.SubElement(entityElement, 'name').text = entity
+        for atr in structure['attrs']:
+            attributeElement = ET.SubElement(entityElement, 'attribute')
+            ET.SubElement(attributeElement, 'name').text = atr['text']
+            ET.SubElement(attributeElement, 'isKey').text = str(atr['isKey'])
+        idx += 1
+    for entity, structure in ents.items():
+        for rel in structure['rels']:
+            print(rel)
+            relElement = ET.SubElement(root, 'relation')
+            entFromElement = ET.SubElement(relElement, 'entity')
+            ET.SubElement(entFromElement, 'id').text = str(entsDict[entity])
+            ET.SubElement(entFromElement, 'num').text = rel['fromNum']
+            entToElement = ET.SubElement(relElement, 'entity')
+            ET.SubElement(entToElement, 'id').text = str(entsDict[rel['to']])
+            ET.SubElement(entToElement, 'num').text = rel['fromNum']
+            ET.SubElement(root, 'mandatory').text = str(rel['rel']['mandatory'])
+
+    tree = ET.ElementTree(root)
+    now = datetime.datetime.now()
+    Path("app/public/" + str(current_user.id)).mkdir(parents=True, exist_ok=True)
+    documentTime = now.strftime("%Y.%m.%d_%H.%M.%S")
+    tree.write('app/public/' + str(current_user.id) + '/xml_' + documentTime + '.xml', encoding="unicode")
+    return 'public/' + str(current_user.id) + '/xml_' + documentTime + '.xml'

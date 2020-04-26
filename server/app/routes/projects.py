@@ -7,7 +7,7 @@ from app.models.ER import ER
 from app.models.Requirement import Requirement
 
 from nlp.classify import classifyReqs
-from nlp.er_generation import getErFromText, getErFromERSents
+from nlp.er_generation import getErFromText, getErFromERSents, exportXML
 
 from app.tt_generation import generateTT
 
@@ -37,7 +37,8 @@ def get_project(id):
   if id:
     project = Project.objects(pk=id).first()
     requirements = Requirement.objects(parent=id)
-    return jsonify({"project": getResponseProject(project, requirements)}), 200
+    ers = ER.objects(parent=id)
+    return jsonify({"project": getResponseProject(project, requirements, ers)}), 200
   return jsonify({"text": "Project id needed."}), 500
 
 @app.route("/api/projects/<id>", methods=["DELETE"])
@@ -122,13 +123,23 @@ def generate_ER():
 @app.route("/api/projects/<project_id>/save-er", methods=["POST"])
 @login_required
 def save_ER(project_id):
+  if project_id:
+    er = request.json['er']
+    if er:
+      ER(name=er['name'], erd=er['erd'], parent=project_id).save()
+      return jsonify({"text": "ER generated."}), 200
+    else:
+      return jsonify({"text": "No er."}), 500
+  return jsonify({"text": "Project id needed."}), 500
+
+@app.route("/api/projects/xml_export", methods=["POST"])
+@login_required
+def get_XML():
   er = request.json['er']
   if er:
-    ER(name=er['name'], erd=er['erd'], parent=project_id).save()
-    return jsonify({"text": "ER generated."}), 200
+    return jsonify({"text": "TT generated.", "xmlLink": exportXML(er)}), 200
   else:
     return jsonify({"text": "No er."}), 500
-  return jsonify({"text": "Project id needed."}), 500
 
 def getResponseReqs(reqs):
   return list(map(lambda x: {
@@ -138,9 +149,17 @@ def getResponseReqs(reqs):
         "createdAt": x.id.generation_time
       }, reqs))
 
-def getResponseProject(project, reqs):
+def getResponseErs(ers):
+  return list(map(lambda x: {
+        "name": x.name,
+        "erd": x.erd,
+        "createdAt": x.id.generation_time
+      }, ers))
+
+def getResponseProject(project, reqs, ers):
   rProject = {}
   rProject['id'] = str(project.id)
   rProject['name'] = project.name
   rProject['reqs'] = getResponseReqs(reqs)
+  rProject['ers'] = getResponseErs(ers)
   return rProject
