@@ -368,16 +368,16 @@ def getErFromERSents(sents):
                             'isBetweeAttrs': False,
                         })
                         print(ents[subj['text']]['rels'])
-    elif sent['objs']['type'] == 'ent':
-        for obj in sent['objs']['objects']:
-            if obj['text'] not in ents:
-                ents[obj['text']] = {}
-                ents[obj['text']]['attrs'] = []
-                ents[obj['text']]['rels'] = []
-            for subj in sent['subjs']['subjects']:
-                entSubj = subj
-                entSubj['dep'] = sent['dep']
-                ents[obj['text']]['attrs'].append(entSubj)
+        elif sent['objs']['type'] == 'ent':
+            for obj in sent['objs']['objects']:
+                if obj['text'] not in ents:
+                    ents[obj['text']] = {}
+                    ents[obj['text']]['attrs'] = []
+                    ents[obj['text']]['rels'] = []
+                for subj in sent['subjs']['subjects']:
+                    entSubj = subj
+                    entSubj['dep'] = sent['dep']
+                    ents[obj['text']]['attrs'].append(entSubj)
 
     for entName, ent in ents.items():
         for atr in ent['attrs']:
