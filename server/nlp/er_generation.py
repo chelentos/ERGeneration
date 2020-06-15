@@ -73,7 +73,7 @@ print('Model is loaded!\n')
 
 pattern = r'.*(<NOUN>)+(<VERB>|<ADJ>)+.*(<NOUN>)+.*'
 
-exceptionWords = ['система', 'приложение', 'возможность', 'бдо', 'бд', 'сервер', 'данные', 'авторизация', 'регистрация', 'функция', 'регистрироваться']
+exceptionWords = ['система', 'приложение', 'возможность', 'бдо', 'бд', 'сервер', 'авторизация', 'регистрация', 'функция', 'регистрироваться']
 
 def getChild(id, sentence):
     child = object()
@@ -111,7 +111,7 @@ def getTokenConjs(token, sentence, isEnt=False):
 def isKey(token, sentence):
     for w in sentence.words[1:]:
         if (w.id in token.children and w.deprel == 'amod'
-          and w.lemma in ['уникальный', 'персональный']) or token.lemma in ['идентификатор', 'айдь']:
+        and w.lemma in ['уникальный', 'персональный']) or token.lemma in ['идентификатор', 'айдь']:
             return True
     return False
 
@@ -133,86 +133,138 @@ def getNum(token):
     return 'Sing'
 
 def getErFromText(text):
-  allEnts = []
-  tables = []
-  sentences = model.tokenize(text)
-  for s in sentences:
-      model.tag(s)
-      model.parse(s)
-      
-  for sentence in sentences:
-      swords = []
-      k = False
-      for token in sentence.words[1:]:
-          swords.append(token.lemma.lower())
-      for word in swords:
-          if word in exceptionWords:
-              k = True
-      if k:
-          continue
-      posString = ""
-      depList = []
-      rootDepList = []
-      root = None
-      subroot = None
-      subrootChildren = []
-      for token in sentence.words[1:]:
-          print(token.id, "-->", token.form, "-->", token.lemma, "-->", token.deprel, "-->", token.upostag, "-->", token.feats)
-          posString += "<" + token.upostag + ">"
-          depList.append(token.deprel)
-          if (token.deprel == "root"):
-              root = token
-      print("\n")
-      print("String with pos tags:", posString)
-      for m in re.compile(pattern).finditer(posString):
-          
-          numTokensInGroup = m.group().count('<')
-          
-          if (numTokensInGroup > 0):
-              if (depList.count("obl") > 0 or depList.count("obj") > 0):
-                dependency = None
-                objects = {}
-                subjects = {}
-                dependencyT = ""
-                for token in sentence.words[1:]:
-                    if (token.deprel == "root"):
-                        dependencyT += token.form
-                        for t in token.children:
-                            ch = getChild(t, sentence)
-                            if (ch.deprel == "xcomp"):
-                                subroot = ch
-                                for t in ch.children:
-                                    subrootChildren.append(t)
-                                    cch = getChild(t, sentence)
-                                    if (cch.deprel == "aux:pass"):
-                                        dependencyT +=  ' ' + cch.form
-                                dependencyT += ' ' + ch.form
-                                if token.lemma == 'должен':
-                                    dependency = {
-                                        'text': dependencyT,
-                                        'mandatory': True
-                                    }
-                                else:
-                                    dependency = {
-                                        'text': dependencyT,
-                                        'mandatory': False
-                                    }
-                        if not dependency:
-                            dependency = {
-                                'text': dependencyT,
-                                'mandatory': True
-                            }
+    allEnts = []
+    tables = []
+    sentences = model.tokenize(text)
+    for s in sentences:
+        model.tag(s)
+        model.parse(s)
+    for sentence in sentences:
+        swords = []
+        k = False
+        for token in sentence.words[1:]:
+            swords.append(token.lemma.lower())
+        for word in swords:
+            if word in exceptionWords:
+                k = True
+        if k:
+            continue
+        posString = ""
+        depList = []
+        rootDepList = []
+        root = None
+        subroot = None
+        subrootChildren = []
+        for token in sentence.words[1:]:
+            print(token.id, "-->", token.form, "-->", token.lemma, "-->", token.deprel, "-->", token.upostag, "-->", token.feats)
+            posString += "<" + token.upostag + ">"
+            depList.append(token.deprel)
+            if (token.deprel == "root"):
+                root = token
+        print("\n")
+        print("String with pos tags:", posString)
+        for m in re.compile(pattern).finditer(posString):
+            numTokensInGroup = m.group().count('<')
+            if (numTokensInGroup > 0):
+                if (depList.count("obl") > 0 or depList.count("obj") > 0):
+                    dependency = None
+                    objects = {}
+                    subjects = {}
+                    subjects['subjects'] = []
+                    subjects['type'] = ''
+                    objects['objects'] = []
+                    objects['type'] = ''
+                    dependencyT = ""
                     for token in sentence.words[1:]:
-                        if token.id in root.children:
-                            rootDepList.append(token.deprel)
-                    if subroot:
+                        if (token.deprel == "root"):
+                            dependencyT += token.form
+                            for t in token.children:
+                                ch = getChild(t, sentence)
+                                if (ch.deprel == "xcomp"):
+                                    subroot = ch
+                                    for t in ch.children:
+                                        subrootChildren.append(t)
+                                        cch = getChild(t, sentence)
+                                        if (cch.deprel == "aux:pass"):
+                                            dependencyT +=  ' ' + cch.form
+                                    dependencyT += ' ' + ch.form
+                                    if token.lemma == 'должен':
+                                        dependency = {
+                                            'text': dependencyT,
+                                            'mandatory': True
+                                        }
+                                    else:
+                                        dependency = {
+                                            'text': dependencyT,
+                                            'mandatory': False
+                                        }
+                            if not dependency:
+                                dependency = {
+                                    'text': dependencyT,
+                                    'mandatory': True
+                                }
                         for token in sentence.words[1:]:
-                            if token.id in subroot.children:
+                            if token.id in root.children:
                                 rootDepList.append(token.deprel)
-                for token in sentence.words[1:]:
-                    if (token.deprel == "obl" or token.deprel == "obj") and (token.id in root.children or token.id in subrootChildren):
-                        if subroot and depList.count("subj") == 0 and depList.count("nsubj") == 0:
-                            if token.deprel == "obl":
+                        if subroot:
+                            for token in sentence.words[1:]:
+                                if token.id in subroot.children:
+                                    rootDepList.append(token.deprel)
+                    for token in sentence.words[1:]:
+                        if (token.deprel == "obl" or token.deprel == "obj") and (token.id in root.children or token.id in subrootChildren):
+                            if subroot and depList.count("subj") == 0 and depList.count("nsubj") == 0:
+                                if token.deprel == "obl":
+                                    objects['type'] = 'ent'
+                                    objects['objects'] = []
+                                    objects['objects'].append({
+                                        'text': token.lemma,
+                                        'num': getNum(token),
+                                    })
+                                    objects['objects'] += getTokenConjs(token, sentence, True)
+                                else:
+                                    attr = ""
+                                    attr += token.lemma
+                                    for t in token.children:
+                                        ch = getChild(t, sentence)
+                                        if ch.deprel == "nmod" and ch.upostag != "PRON":
+                                            attr += ' ' + ch.form
+                                    subjects['type'] = 'atr'
+                                    subjects['subjects'] = []
+                                    subjects['subjects'].append({
+                                        'text': attr,
+                                        'num': getNum(token),
+                                        'isKey': isKey(token, sentence)
+                                    })
+                                    subjects['subjects'] += getTokenConjs(token, sentence)
+                                continue
+                            if rootDepList.count("obl") > 0 and rootDepList.count("obj") > 0:
+                                if token.deprel == "obj":
+                                    print(token.lemma)
+                                    if (getRootVoice(subroot if subroot else root) in ['Pass', 'Mid']) or root.lemma in ['быть', 'образовывать', 'создавать', 'формировать']:
+                                        objects['type'] = 'ent'
+                                        objects['objects'] = []
+                                        objects['objects'].append({
+                                            'text': token.lemma,
+                                            'num': getNum(token),
+                                        })
+                                        objects['objects'] += getTokenConjs(token, sentence, True)
+                                    else:   
+                                        attr = ""
+                                        attr += token.lemma
+                                        for t in token.children:
+                                            ch = getChild(t, sentence)
+                                            if ch.deprel == "nmod" and ch.upostag != "PRON":
+                                                attr += ' ' + ch.form
+                                        objects['type'] = 'atr'
+                                        objects['objects'] = []
+                                        objects['objects'].append({
+                                            'text': attr,
+                                            'num': getNum(token),
+                                            'isKey': isKey(token, sentence)
+                                        })
+                                        objects['objects'] += getTokenConjs(token, sentence)
+                                continue
+                            if (getRootVoice(subroot if subroot else root) in ['Pass', 'Mid']) or root.lemma in ['быть', 'образовывать', 'создавать', 'формировать']:
                                 objects['type'] = 'ent'
                                 objects['objects'] = []
                                 objects['objects'].append({
@@ -220,6 +272,30 @@ def getErFromText(text):
                                     'num': getNum(token),
                                 })
                                 objects['objects'] += getTokenConjs(token, sentence, True)
+                            else:   
+                                attr = ""
+                                attr += token.lemma
+                                for t in token.children:
+                                    ch = getChild(t, sentence)
+                                    if ch.deprel == "nmod" and ch.upostag != "PRON":
+                                        attr += ' ' + ch.form
+                                objects['type'] = 'atr'
+                                objects['objects'] = []
+                                objects['objects'].append({
+                                    'text': attr,
+                                    'num': getNum(token),
+                                    'isKey': isKey(token, sentence)
+                                })
+                                objects['objects'] += getTokenConjs(token, sentence)
+                        elif (token.deprel == "nsubj") or (token.deprel == "nsubj:pass" and (token.id in root.children or token.id in subrootChildren)):
+                            if (getRootVoice(subroot if subroot else root) == 'Act' and root.lemma not in ['быть', 'образовывать', 'создавать', 'формировать']):                          
+                                subjects['type'] = 'ent'
+                                subjects['subjects'] = []
+                                subjects['subjects'].append({
+                                    'text': token.lemma,
+                                    'num': getNum(token),
+                                })
+                                subjects['subjects'] += getTokenConjs(token, sentence, True)
                             else:
                                 attr = ""
                                 attr += token.lemma
@@ -235,138 +311,63 @@ def getErFromText(text):
                                     'isKey': isKey(token, sentence)
                                 })
                                 subjects['subjects'] += getTokenConjs(token, sentence)
-                            continue
-                        if rootDepList.count("obl") > 0 and rootDepList.count("obj") > 0:
-                            if token.deprel == "obj":
-                                print(token.lemma)
-                                if (getRootVoice(subroot if subroot else root) in ['Pass', 'Mid']) or root.lemma in ['быть', 'образовывать', 'создавать', 'формировать']:
-                                    objects['type'] = 'ent'
-                                    objects['objects'] = []
-                                    objects['objects'].append({
-                                        'text': token.lemma,
-                                        'num': getNum(token),
-                                    })
-                                    objects['objects'] += getTokenConjs(token, sentence, True)
-                                else:   
-                                    attr = ""
-                                    attr += token.lemma
-                                    for t in token.children:
-                                        ch = getChild(t, sentence)
-                                        if ch.deprel == "nmod" and ch.upostag != "PRON":
-                                            attr += ' ' + ch.form
-                                    objects['type'] = 'atr'
-                                    objects['objects'] = []
-                                    objects['objects'].append({
-                                        'text': attr,
-                                        'num': getNum(token),
-                                        'isKey': isKey(token, sentence)
-                                    })
-                                    objects['objects'] += getTokenConjs(token, sentence)
-                            continue
-                        if (getRootVoice(subroot if subroot else root) in ['Pass', 'Mid']) or root.lemma in ['быть', 'образовывать', 'создавать', 'формировать']:
-                            objects['type'] = 'ent'
-                            objects['objects'] = []
-                            objects['objects'].append({
-                                'text': token.lemma,
-                                'num': getNum(token),
-                            })
-                            objects['objects'] += getTokenConjs(token, sentence, True)
-                        else:   
-                            attr = ""
-                            attr += token.lemma
-                            for t in token.children:
-                                ch = getChild(t, sentence)
-                                if ch.deprel == "nmod" and ch.upostag != "PRON":
-                                    attr += ' ' + ch.form
-                            objects['type'] = 'atr'
-                            objects['objects'] = []
-                            objects['objects'].append({
-                                'text': attr,
-                                'num': getNum(token),
-                                'isKey': isKey(token, sentence)
-                            })
-                            objects['objects'] += getTokenConjs(token, sentence)
-                    elif (token.deprel == "nsubj") or (token.deprel == "nsubj:pass" and (token.id in root.children or token.id in subrootChildren)):
-                        if (getRootVoice(subroot if subroot else root) == 'Act' and root.lemma not in ['быть', 'образовывать', 'создавать', 'формировать']):                          
-                            subjects['type'] = 'ent'
-                            subjects['subjects'] = []
-                            subjects['subjects'].append({
-                                'text': token.lemma,
-                                'num': getNum(token),
-                            })
-                            subjects['subjects'] += getTokenConjs(token, sentence, True)
-                        else:
-                            attr = ""
-                            attr += token.lemma
-                            for t in token.children:
-                                ch = getChild(t, sentence)
-                                if ch.deprel == "nmod" and ch.upostag != "PRON":
-                                    attr += ' ' + ch.form
-                            subjects['type'] = 'atr'
-                            subjects['subjects'] = []
-                            subjects['subjects'].append({
-                                'text': attr,
-                                'num': getNum(token),
-                                'isKey': isKey(token, sentence)
-                            })
-                            subjects['subjects'] += getTokenConjs(token, sentence)
-                            if (token.deprel in ["nsubj", "nsubj:pass"] ):
-                                subjects['subjects'] += getTokenConjs(token, sentence)
-                            else:
-                                subjects['subjects'] += getTokenConjs(root, sentence)
-                objects['objects'] = list({o['text']:o for o in objects['objects']}.values())
-                subjects['subjects'] = list({s['text']:s for s in subjects['subjects']}.values())
-                if objects['type'] == 'ent':
-                    for obj in objects['objects']:
-                        allEnts.append(obj['text'])
-                if subjects['type'] == 'ent':
-                    for subj in subjects['subjects']:
-                        allEnts.append(subj['text'])
-                tables.append({
-                    'dep': dependency,
-                    'objs': objects,
-                    'subjs': subjects,
-                    'sentence_text': sentence.getText(),
-                })
-  for table in tables:
-    if table['objs']['type'] == 'atr':
-        for obj in table['objs']['objects']:
-            if obj['text'] in allEnts:
-                table['objs']['type'] = 'ent'
-    if table['subjs']['type'] == 'atr':
-        for subj in table['subjs']['subjects']:
-            if subj['text'] in allEnts:
-                table['subjs']['type'] = 'ent'
-  return tables
+                                if (token.deprel in ["nsubj", "nsubj:pass"] ):
+                                    subjects['subjects'] += getTokenConjs(token, sentence)
+                                else:
+                                    subjects['subjects'] += getTokenConjs(root, sentence)
+                    objects['objects'] = list({o['text']:o for o in objects['objects']}.values())
+                    subjects['subjects'] = list({s['text']:s for s in subjects['subjects']}.values())
+                    if objects['type'] == 'ent':
+                        for obj in objects['objects']:
+                            allEnts.append(obj['text'])
+                    if subjects['type'] == 'ent':
+                        for subj in subjects['subjects']:
+                            allEnts.append(subj['text'])
+                    tables.append({
+                        'dep': dependency,
+                        'objs': objects,
+                        'subjs': subjects,
+                        'sentence_text': sentence.getText(),
+                    })
+    for table in tables:
+        if table['objs']['type'] == 'atr':
+            for obj in table['objs']['objects']:
+                if obj['text'] in allEnts:
+                    table['objs']['type'] = 'ent'
+        if table['subjs']['type'] == 'atr':
+            for subj in table['subjs']['subjects']:
+                if subj['text'] in allEnts:
+                    table['subjs']['type'] = 'ent'
+    return tables
 
 def getErFromERSents(sents):
-  ents = {}
-  for sent in sents:
-    if sent['subjs']['type'] == 'ent':
-        for subj in sent['subjs']['subjects']:
-            if subj['text'] not in ents:
-                ents[subj['text']] = {}
-                ents[subj['text']]['rels'] = []
-                ents[subj['text']]['attrs'] = []
-            if sent['objs']['type'] == 'atr':
-                for obj in sent['objs']['objects']:
-                    entObj = obj
-                    entObj['dep'] = sent['dep']
-                    ents[subj['text']]['attrs'].append(entObj)
-            else:
-                for obj in sent['objs']['objects']:
-                    if obj['text'] not in ents:
-                        ents[obj['text']] = {}
-                        ents[obj['text']]['attrs'] = []
-                        ents[obj['text']]['rels'] = []
-                    ents[subj['text']]['rels'].append({
-                        'rel': sent['dep'],
-                        'to': obj['text'],
-                        'toNum': obj['num'],
-                        'fromNum': subj['num'],
-                        'isBetweeAttrs': False,
-                    })
-                    print(ents[subj['text']]['rels'])
+    ents = {}
+    for sent in sents:
+        if sent['subjs']['type'] == 'ent':
+            for subj in sent['subjs']['subjects']:
+                if subj['text'] not in ents:
+                    ents[subj['text']] = {}
+                    ents[subj['text']]['rels'] = []
+                    ents[subj['text']]['attrs'] = []
+                if sent['objs']['type'] == 'atr':
+                    for obj in sent['objs']['objects']:
+                        entObj = obj
+                        entObj['dep'] = sent['dep']
+                        ents[subj['text']]['attrs'].append(entObj)
+                else:
+                    for obj in sent['objs']['objects']:
+                        if obj['text'] not in ents:
+                            ents[obj['text']] = {}
+                            ents[obj['text']]['attrs'] = []
+                            ents[obj['text']]['rels'] = []
+                        ents[subj['text']]['rels'].append({
+                            'rel': sent['dep'],
+                            'to': obj['text'],
+                            'toNum': obj['num'],
+                            'fromNum': subj['num'],
+                            'isBetweeAttrs': False,
+                        })
+                        print(ents[subj['text']]['rels'])
     elif sent['objs']['type'] == 'ent':
         for obj in sent['objs']['objects']:
             if obj['text'] not in ents:
@@ -378,35 +379,35 @@ def getErFromERSents(sents):
                 entSubj['dep'] = sent['dep']
                 ents[obj['text']]['attrs'].append(entSubj)
 
-  for entName, ent in ents.items():
-    for atr in ent['attrs']:
-        if len(atr['text'].split(' ')) > 1:
-            tokens = model.tokenize(atr['text'])
-            for t in tokens:
-                    model.tag(t)
-                    model.parse(t)
-            for token in tokens:
-                root = None
-                nmod = None
-                for t in token.words[1:]:
-                    if t.deprel == 'root':
-                        root = t
-                    elif t.deprel == 'nmod':
-                        nmod = t
-                if root and nmod:
-                    for entName2, ent2 in ents.items():
-                        if entName2 == nmod.lemma:
-                            for atr2 in ent2['attrs']:
-                                if atr2['text'] == root.lemma:
-                                    ent2['rels'].append({
-                                        'rel': atr['dep'],
-                                        'to': entName,
-                                        'toNum': 'Sing',
-                                        'fromNum': atr['num'],
-                                        'isBetweenAttrs': True,
-                                        'fromAtr': atr2['text'],
-                                    })
-  return ents
+    for entName, ent in ents.items():
+        for atr in ent['attrs']:
+            if len(atr['text'].split(' ')) > 1:
+                tokens = model.tokenize(atr['text'])
+                for t in tokens:
+                        model.tag(t)
+                        model.parse(t)
+                for token in tokens:
+                    root = None
+                    nmod = None
+                    for t in token.words[1:]:
+                        if t.deprel == 'root':
+                            root = t
+                        elif t.deprel == 'nmod':
+                            nmod = t
+                    if root and nmod:
+                        for entName2, ent2 in ents.items():
+                            if entName2 == nmod.lemma:
+                                for atr2 in ent2['attrs']:
+                                    if atr2['text'] == root.lemma:
+                                        ent2['rels'].append({
+                                            'rel': atr['dep'],
+                                            'to': entName,
+                                            'toNum': 'Sing',
+                                            'fromNum': atr['num'],
+                                            'isBetweenAttrs': True,
+                                            'fromAtr': atr2['text'],
+                                        })
+    return ents
 
 def exportXML(ents):
     # create XML 
@@ -419,6 +420,7 @@ def exportXML(ents):
         entityElement = ET.SubElement(root, 'entity', id=str(idx))
         ET.SubElement(entityElement, 'name').text = entity
         for atr in structure['attrs']:
+            print(atr)
             attributeElement = ET.SubElement(entityElement, 'attribute')
             ET.SubElement(attributeElement, 'name').text = atr['text']
             ET.SubElement(attributeElement, 'isKey').text = str(atr['isKey'])

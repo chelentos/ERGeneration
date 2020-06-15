@@ -64,16 +64,16 @@ def load_reqs(id):
       return jsonify({"reqs": getResponseReqs(requirements)}), 200
   return jsonify({"text": "Project id needed."}), 500
 
-@app.route("/api/projects/<id>/reqs", methods=["PUT"])
+@app.route("/api/projects/<project_id>/reqs", methods=["PUT"])
 @login_required
-def update_req(id):
+def update_req(project_id):
   if id:
-    project = Project.objects(pk=id).first()
+    project = Project.objects(pk=project_id).first()
     if project:
       success = Requirement(pk=request.json['req']['id']).update(
         text = request.json['req']['text'],
         req_type = request.json['req']['type'],
-        parent = id
+        parent = project_id
       )
       if success:
         return jsonify({"text": "Req was updated"}), 200
