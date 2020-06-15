@@ -16,9 +16,33 @@
         </v-navbar>
         <div class="app-body">
             <main class="main">
-                <div class="container-fluid h-100">
-                  <router-view/>
-                </div>
+                <div style="display: flex; align-items: stretch;">
+                  <div v-show="isErGeneration" class="generationArrowWrapper">
+                    <p
+                      :class="idx === 0 ? 'generationArrow generationArrow-off' : 'generationArrow'">
+                      <span
+                        @click="goBack"
+                        style="font-size: 30px;"
+                      >
+                        <i class="fas fa-chevron-left"></i>
+                      </span>
+                    </p>
+                  </div>
+                  <div class="container-fluid h-100">
+                    <router-view/>
+                  </div>
+                  <div v-show="isErGeneration" class="generationArrowWrapper">
+                    <p 
+                      :class="idx === sents.length - 1 ? 'generationArrow generationArrow-off' : 'generationArrow'">
+                      <span
+                        @click="goForward"
+                        style="font-size: 30px;"
+                      >
+                        <i class="fas fa-chevron-right"></i>
+                      </span>
+                    </p>
+                  </div>
+                </div>                
             </main>
         </div>
     </div>
@@ -49,11 +73,17 @@ export default {
   computed: {
     ...mapGetters({
       currentUser: 'currentUser/getCurrentUser',
+      sents: 'ergeneration/getERSents',
+      idx: 'ergeneration/getCurrentSent',
     }),
+    isErGeneration() {
+      return this.$route.path.includes('er_generation')
+    },
   },
   methods: {
     ...mapMutations({
       setCurrentUser: 'currentUser/setCurrentUser',
+      setIdx: 'ergeneration/setCurrentSent',
     }),
     ...mapActions({
       logout: 'currentUser/logout',
@@ -64,17 +94,44 @@ export default {
         this.$router.push('/')
       })
     },
+    goForward() {
+      if (this.idx < this.sents.length - 1) {
+        this.setIdx(this.idx + 1)
+      }
+    },
+    goBack() {
+      if (this.idx > 0) {
+        this.setIdx(this.idx - 1)
+      }
+    },
   },
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .app-body {
-  margin-top: 80px;
+  margin-top: 20px;
 }
 
 .app-header{
   min-width: 320px !important;
+}
+
+.generationArrowWrapper {
+  height: 600px;
+  width: 150px;
+  display: flex;
+  justify-content: center;
+
+  .generationArrow {
+    margin: auto;
+    cursor: pointer;
+
+    &-off {
+      color: grey;
+      cursor: default;
+    }
+  }
 }
 
 @media screen and (max-width: 992px) {

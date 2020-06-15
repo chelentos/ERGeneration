@@ -11,9 +11,20 @@
               max-rows="10"
               class="reqsInput__area"
             ></b-form-textarea>
-            <div class="mx-auto mt-2" style="width: 100px;">
-              <b-button class="reqsInput__button" @click="onReqsInputSubmit">
+            <div class="buttonsBlock mt-2">
+              <b-button
+                class="reqsInput__button mr-2"
+                variant="primary"
+                @click="onReqsInputSubmit"
+              >
                 Отправить
+              </b-button>
+              <b-button
+                class="reqsInput__button"
+                variant="dark"
+                @click="goBack"
+              >
+                Отмена
               </b-button>
             </div>
           </div>
@@ -51,11 +62,7 @@ export default {
 
       annyang.setLanguage('ru')
 
-      // Add our commands to annyang
-      // annyang.addCommands(commands);
-
       annyang.addCallback('result', (phrases) => {
-        console.log(phrases)
         const res = phrases[0]
         this.text += `${res.toUpperCase().charAt(0)}${res.split(' ')[0].slice(1)} ${res.split(' ').slice(1).join(' ')}. `
       });
@@ -80,9 +87,19 @@ export default {
         this.$router.push('./')
       })
     },
+    goBack() {
+      this.$router.push('./')
+    }
   },
 }
 </script>
 
 <style scoped>
+
+.buttonsBlock {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
 </style>

@@ -46,6 +46,12 @@ export default new Router({
           meta: { label: '' },
           component: () => import('./components/ER/VERGeneration.vue'),
         },
+        {
+          path: 'projects/:projectId/er',
+          name: 'er_generation',
+          meta: { label: '' },
+          component: () => import('./components/ER/VShowER.vue'),
+        },
       ],
     },
   ],

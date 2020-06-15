@@ -1,5 +1,5 @@
 <template>
-    <b-container class="mt-5">
+    <b-container>
       <b-row class="justify-content-md-center">
         <b-col col lg="10">
           <b-button
@@ -52,9 +52,7 @@ export default {
     }),
   },
   mounted() {
-    if (this.projects.length === 0) {
-      this.fetchProjects()
-    }
+    this.fetchProjects()
   },
   methods: {
     ...mapActions({

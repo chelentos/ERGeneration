@@ -68,7 +68,7 @@ export default {
     }),
     onSubmit() {
       this.login(this.form).then(() => {
-        this.$router.push('/')
+        this.$router.push('/projects')
       })
     },
   },

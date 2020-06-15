@@ -10,6 +10,9 @@ export default {
     isERGeneration: false,
     isTTGeneration: false,
     ERSents: [],
+    currentSent: 0,
+    ER: null,
+    isNewER: false,
   },
 
   mutations: {
@@ -21,15 +24,6 @@ export default {
     },
     [MUTATION_TYPE.setProjectReqs]: (state, reqs) => {
       state.project.reqs = reqs
-    },
-    [MUTATION_TYPE.setERGeneration]: (state, ERGeneration) => {
-      state.isERGeneration = ERGeneration
-    },
-    [MUTATION_TYPE.setTTGeneration]: (state, TTGeneration) => {
-      state.isTTGeneration = TTGeneration
-    },
-    [MUTATION_TYPE.setERSents]: (state, sents) => {
-      state.ERSents = sents
     },
   },
 
@@ -48,17 +42,10 @@ export default {
       const response = await projectsAPI.loadReqs(projectId, reqs)
       commit(MUTATION_TYPE.setProjectReqs, response.data.reqs)
     },
-    [ACTION_TYPE.genERSents]: async ({ commit }, { projectId, text }) => {
-      const response = await projectsAPI.generateER(projectId, text)
-      commit(MUTATION_TYPE.setERSents, response.data.er)
-    },
   },
 
   getters: {
     [GETTER_TYPE.getProjects]: (state) => state.projects,
     [GETTER_TYPE.getProject]: (state) => state.project,
-    [GETTER_TYPE.isERGeneration]: (state) => state.isERGeneration,
-    [GETTER_TYPE.isTTGeneration]: (state) => state.isTTGeneration,
-    [GETTER_TYPE.getERSents]: (state) => state.ERSents,
   },
 }

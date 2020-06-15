@@ -7,6 +7,15 @@ const MUTATION_TYPE = {
   setERGeneration: 'setERGeneration',
   setTTGeneration: 'setTTGeneration',
   setERSents: 'setERSents',
+  setCurrentSent: 'setCurrentSent',
+  updateElement: 'updateElement',
+  updateElementsType: 'updateElementsType',
+  updateDep: 'updateDep',
+  deleteERSent: 'deleteERSent',
+  deleteERSentWord: 'deleteERSentWord',
+  addERSentWord: 'addERSentWord',
+  setER: 'setER',
+  setIsNewER: 'setIsNewER',
 }
 
 const ACTION_TYPE = {
@@ -19,6 +28,7 @@ const ACTION_TYPE = {
   fetchProject: 'fetchProject',
   loadReqs: 'loadReqs',
   genERSents: 'genERSents',
+  sendERSents: 'sendERSents',
 }
 
 const GETTER_TYPE = {
@@ -29,6 +39,9 @@ const GETTER_TYPE = {
   isERGeneration: 'isERGeneration',
   isTTGeneration: 'isTTGeneration',
   getERSents: 'getERSents',
+  getCurrentSent: 'getCurrentSent',
+  getER: 'getER',
+  isNewEr: 'isNewEr',
 }
 
 export {

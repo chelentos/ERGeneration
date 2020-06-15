@@ -34,6 +34,18 @@ export default {
   },
 
   generateER(projectId, text) {
-    return http.post(`/api/projects/${projectId}/generate-er`, { text })
+    return http.post(`/api/projects/${projectId}/generate-ersents`, { text })
+  },
+
+  sendERSents(sents) {
+    return http.post(`/api/projects/generate-er`, { sents })
+  },
+
+  saveER(projectId, er) {
+    return http.post(`/api/projects/${projectId}/save-er`, { er })
+  },
+
+  exportXML(er) {
+    return http.post('/api/projects/xml_export', { er })
   },
 }

@@ -173,11 +173,11 @@ export default {
   },
   computed: {
     ...mapGetters({
-      isERGeneration: 'projects/isERGeneration',
-      isTTGeneration: 'projects/isTTGeneration',
+      isERGeneration: 'ergeneration/isERGeneration',
+      isTTGeneration: 'ergeneration/isTTGeneration',
     }),
     createdAt() {
-      return moment(this.req.createdAt).format('DD, MMMM YYYY, HH:mm');
+      return moment(this.req.createdAt).format('DD, MMMM YYYY, HH:mm')
     },
   },
   watch: {
@@ -186,6 +186,22 @@ export default {
         selected: this.status,
         req: this.req,
       })
+    },
+    isTTGeneration() {
+      if (this.isTTGeneration) {
+        this.status = true
+      } else {
+        this.status = false
+      }
+    },
+    isERGeneration() {
+      if (this.isERGeneration) {
+        if (this.req.type === 'F') {
+          this.status = true
+        }
+      } else {
+        this.status = false
+      }
     },
   },
   methods: {

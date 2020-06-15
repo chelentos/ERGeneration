@@ -15,7 +15,7 @@ export default {
       } if (req === 'A') {
         return 'Доступность'
       } if (req === 'O') {
-        return 'Поддерживаемость'
+        return 'Эксплуатация'
       } if (req === 'US') {
         return 'Юзабилити'
       } if (req === 'L') {
@@ -24,5 +24,16 @@ export default {
         return 'Производительность'
       }
     },
+    translateNum(num, mandatory) {
+      if (num === 'Sing' && mandatory) {
+        return '1'
+      } else if (num === 'Sing' && !mandatory) {
+        return '0..1'
+      } else if (num === 'Plur' && !mandatory) {
+        return '0..∞'
+      } else if (num === 'Plur' && mandatory) {
+        return '1..∞'
+      }
+    }
   },
 }
